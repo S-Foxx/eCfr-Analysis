@@ -8,7 +8,153 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
-    <div id="app" class="container mx-auto p-6 max-w-7xl">
+    <!-- Mobile Menu Toggle -->
+    <button id="sidebar-toggle" class="fixed top-4 left-4 z-50 md:hidden bg-blue-600 text-white p-3 rounded-lg shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-80 bg-white shadow-xl z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-900">Guide & Metrics</h2>
+                <button id="sidebar-close" class="md:hidden text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Color Legend -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold text-sm text-gray-700 mb-3">Burden Index Color Legend</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-red-600 rounded"></div>
+                        <span class="text-gray-700"><strong>7.0 - 10.0:</strong> High burden - Priority review needed</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                        <span class="text-gray-700"><strong>4.0 - 6.9:</strong> Moderate burden - Targeted improvements</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-green-600 rounded"></div>
+                        <span class="text-gray-700"><strong>0.0 - 3.9:</strong> Low burden - Maintain efficiency</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metric Explanations (Accordion) -->
+            <div class="space-y-2">
+                <!-- Burden Index -->
+                <div class="border border-gray-200 rounded-lg">
+                    <button onclick="toggleAccordion('burden')" class="w-full px-4 py-3 text-left font-semibold text-gray-900 hover:bg-gray-50 flex justify-between items-center">
+                        <span>📊 Burden Index</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="burden-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="burden-content" class="hidden px-4 py-3 text-sm text-gray-600 bg-gray-50">
+                        <p class="mb-2"><strong>What it measures:</strong> Overall regulatory burden combining size, density, and complexity.</p>
+                        <p class="mb-2"><strong>Formula:</strong> (size × 0.4) + (density × 0.3) + (complexity × 0.3)</p>
+                        <p class="mb-2"><strong>Scale:</strong> 0-10 (higher = more burden)</p>
+                        <p><strong>Use:</strong> Prioritize titles with scores > 7 for deregulation review.</p>
+                    </div>
+                </div>
+
+                <!-- Word Count -->
+                <div class="border border-gray-200 rounded-lg">
+                    <button onclick="toggleAccordion('words')" class="w-full px-4 py-3 text-left font-semibold text-gray-900 hover:bg-gray-50 flex justify-between items-center">
+                        <span>📝 Word Count</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="words-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="words-content" class="hidden px-4 py-3 text-sm text-gray-600 bg-gray-50">
+                        <p class="mb-2"><strong>What it measures:</strong> Total regulatory text volume in millions of words.</p>
+                        <p class="mb-2"><strong>Calculation:</strong> File size in bytes ÷ 5 (approximate)</p>
+                        <p><strong>Insight:</strong> Larger word counts indicate more extensive regulation to review and comply with.</p>
+                    </div>
+                </div>
+
+                <!-- Complexity Score -->
+                <div class="border border-gray-200 rounded-lg">
+                    <button onclick="toggleAccordion('complexity')" class="w-full px-4 py-3 text-left font-semibold text-gray-900 hover:bg-gray-50 flex justify-between items-center">
+                        <span>🔀 Complexity Score</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="complexity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="complexity-content" class="hidden px-4 py-3 text-sm text-gray-600 bg-gray-50">
+                        <p class="mb-2"><strong>What it measures:</strong> Structural difficulty from hierarchical depth and branching.</p>
+                        <p class="mb-2"><strong>Formula:</strong> (max_depth × 10) + (sections/parts × 5) + (total_nodes / 100)</p>
+                        <p><strong>Insight:</strong> High scores (>400) suggest need for reorganization or consolidation.</p>
+                    </div>
+                </div>
+
+                <!-- Regulatory Density -->
+                <div class="border border-gray-200 rounded-lg">
+                    <button onclick="toggleAccordion('density')" class="w-full px-4 py-3 text-left font-semibold text-gray-900 hover:bg-gray-50 flex justify-between items-center">
+                        <span>📐 Regulatory Density</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="density-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="density-content" class="hidden px-4 py-3 text-sm text-gray-600 bg-gray-50">
+                        <p class="mb-2"><strong>What it measures:</strong> Granularity of regulation (sections per part).</p>
+                        <p class="mb-2"><strong>Formula:</strong> Total sections ÷ Total parts</p>
+                        <p><strong>Insight:</strong> Very high density (>50) may indicate micromanagement; very low (<5) may indicate vagueness.</p>
+                    </div>
+                </div>
+
+                <!-- Change Velocity -->
+                <div class="border border-gray-200 rounded-lg">
+                    <button onclick="toggleAccordion('velocity')" class="w-full px-4 py-3 text-left font-semibold text-gray-900 hover:bg-gray-50 flex justify-between items-center">
+                        <span>⚡ Change Velocity</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="velocity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="velocity-content" class="hidden px-4 py-3 text-sm text-gray-600 bg-gray-50">
+                        <p class="mb-2"><strong>What it measures:</strong> Frequency of regulatory changes (changes per year).</p>
+                        <p class="mb-2"><strong>Calculation:</strong> Unique amendment dates in last 5 years ÷ 5</p>
+                        <p><strong>Insight:</strong> High velocity (>50/year) may indicate instability; consider regulatory pause periods.</p>
+                    </div>
+                </div>
+
+                <!-- Sections -->
+                <div class="border border-gray-200 rounded-lg">
+                    <button onclick="toggleAccordion('sections')" class="w-full px-4 py-3 text-left font-semibold text-gray-900 hover:bg-gray-50 flex justify-between items-center">
+                        <span>📋 Sections</span>
+                        <svg class="w-5 h-5 transform transition-transform" id="sections-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="sections-content" class="hidden px-4 py-3 text-sm text-gray-600 bg-gray-50">
+                        <p class="mb-2"><strong>What it measures:</strong> Number of individual regulatory requirements.</p>
+                        <p><strong>Insight:</strong> Each section typically represents a distinct compliance requirement or obligation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="font-semibold text-sm text-blue-900 mb-2">💡 Quick Tips</h3>
+                <ul class="text-xs text-blue-800 space-y-1">
+                    <li>• Hover over metrics for quick definitions</li>
+                    <li>• Click title rows to expand details</li>
+                    <li>• Sort by any metric using dropdown</li>
+                    <li>• Red titles = highest priority for review</li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div id="app" class="md:ml-80 min-h-screen">
+        <div class="container mx-auto p-6 max-w-7xl">
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8 mb-6">
             <h1 class="text-4xl font-bold mb-2">eCFR Deregulation Analysis</h1>
             <p class="text-lg opacity-90">Analyzing all 50 CFR titles across 153 federal agencies</p>
@@ -16,21 +162,41 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-6 text-center">
+            <div class="bg-white rounded-lg shadow p-6 text-center relative group cursor-help">
                 <div class="text-3xl font-bold text-blue-600" id="stat-titles">-</div>
                 <div class="text-sm text-gray-600 mt-1">Titles Analyzed</div>
+                <!-- Tooltip -->
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Number of CFR titles analyzed
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-6 text-center">
+            <div class="bg-white rounded-lg shadow p-6 text-center relative group cursor-help">
                 <div class="text-3xl font-bold text-green-600" id="stat-agencies">-</div>
                 <div class="text-sm text-gray-600 mt-1">Federal Agencies</div>
+                <!-- Tooltip -->
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Total agencies with CFR regulations
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-6 text-center">
+            <div class="bg-white rounded-lg shadow p-6 text-center relative group cursor-help">
                 <div class="text-3xl font-bold text-purple-600" id="stat-words">-</div>
                 <div class="text-sm text-gray-600 mt-1">Total Words (M)</div>
+                <!-- Tooltip -->
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Millions of words across all regulations
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-6 text-center">
+            <div class="bg-white rounded-lg shadow p-6 text-center relative group cursor-help">
                 <div class="text-3xl font-bold text-red-600" id="stat-burden">-</div>
                 <div class="text-sm text-gray-600 mt-1">Avg Burden Index</div>
+                <!-- Tooltip -->
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-48 text-center z-10">
+                    Composite score (0-10) measuring overall regulatory burden. Higher = more burden.
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                </div>
             </div>
         </div>
 
@@ -44,7 +210,7 @@
                     <option value="velocity">Sort by Change Velocity</option>
                 </select>
             </div>
-            <div id="titles-list" class="divide-y">
+            <div id="titles-list" class="space-y-0">
                 <div class="p-8 text-center text-gray-500">Loading titles...</div>
             </div>
         </div>
@@ -69,6 +235,7 @@
                     </tbody>
                 </table>
             </div>
+        </div>
         </div>
     </div>
 
@@ -134,67 +301,231 @@
             const sorted = [...titlesData].sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
             
             const html = sorted.map(t => {
-                const burdenColor = t.burden > 7 ? 'text-red-600' : t.burden > 4 ? 'text-yellow-600' : 'text-green-600';
-                const recoBg = t.burden > 7 ? 'bg-red-100 text-red-900' : 'bg-green-100 text-green-900';
-                const recoText = t.burden > 7 ? 'High burden - priority for comprehensive review' : 
-                                t.burden > 4 ? 'Moderate burden - targeted improvements recommended' : 
-                                'Lower burden - maintain current efficiency';
+                // Determine priority level and styling
+                const priority = t.burden > 7 ? 'critical' : t.burden > 5 ? 'high' : t.burden > 3 ? 'medium' : 'low';
+                const priorityConfig = {
+                    critical: { 
+                        badge: 'CRITICAL PRIORITY', 
+                        badgeBg: 'bg-red-600', 
+                        cardBorder: 'border-l-4 border-red-600',
+                        burdenBg: 'bg-red-100',
+                        burdenText: 'text-red-800',
+                        icon: '🚨'
+                    },
+                    high: { 
+                        badge: 'HIGH PRIORITY', 
+                        badgeBg: 'bg-orange-500', 
+                        cardBorder: 'border-l-4 border-orange-500',
+                        burdenBg: 'bg-orange-100',
+                        burdenText: 'text-orange-800',
+                        icon: '⚠️'
+                    },
+                    medium: { 
+                        badge: 'MODERATE', 
+                        badgeBg: 'bg-yellow-500', 
+                        cardBorder: 'border-l-4 border-yellow-500',
+                        burdenBg: 'bg-yellow-100',
+                        burdenText: 'text-yellow-800',
+                        icon: '📊'
+                    },
+                    low: { 
+                        badge: 'LOW PRIORITY', 
+                        badgeBg: 'bg-green-600', 
+                        cardBorder: 'border-l-4 border-green-600',
+                        burdenBg: 'bg-green-100',
+                        burdenText: 'text-green-800',
+                        icon: '✓'
+                    }
+                };
+                
+                const config = priorityConfig[priority];
+                
+                // Calculate percentages for visual bars
+                const maxWords = Math.max(...titlesData.map(x => x.word_count));
+                const maxSections = Math.max(...titlesData.map(x => x.sections));
+                const maxComplexity = Math.max(...titlesData.map(x => x.complexity));
+                const maxVelocity = Math.max(...titlesData.map(x => x.velocity));
+                
+                const wordsPct = (t.word_count / maxWords * 100).toFixed(0);
+                const sectionsPct = (t.sections / maxSections * 100).toFixed(0);
+                const complexityPct = (t.complexity / maxComplexity * 100).toFixed(0);
+                const velocityPct = (t.velocity / maxVelocity * 100).toFixed(0);
+                const burdenPct = (t.burden / 10 * 100).toFixed(0);
                 
                 return `
-                <div class="p-4 hover:bg-gray-50 cursor-pointer" onclick="toggleDetails(${t.title_number})">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex-1">
-                            <div class="font-bold text-lg">Title ${t.title_number}: ${t.title_name}</div>
-                            <div class="text-sm text-gray-600">Last amended: ${t.last_amended}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold ${burdenColor}">
-                                ${t.burden.toFixed(1)}
-                            </div>
-                            <div class="text-xs text-gray-500">Burden Index</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-4 gap-4 text-sm">
-                        <div>
-                            <span class="text-gray-600">Words:</span>
-                            <span class="font-semibold ml-1">${(t.word_count / 1000000).toFixed(1)}M</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Sections:</span>
-                            <span class="font-semibold ml-1">${t.sections.toLocaleString()}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Complexity:</span>
-                            <span class="font-semibold ml-1">${t.complexity.toFixed(1)}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-600">Velocity:</span>
-                            <span class="font-semibold ml-1">${t.velocity.toFixed(1)}/yr</span>
-                        </div>
-                    </div>
-                    <div id="details-${t.title_number}" class="hidden mt-4 p-4 bg-blue-50 rounded">
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <div class="font-medium mb-2">Structure</div>
-                                <div class="space-y-1">
-                                    <div>Parts: ${t.parts}</div>
-                                    <div>Sections: ${t.sections}</div>
-                                    <div>Density: ${t.density} sections/part</div>
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow ${config.cardBorder} mb-4 overflow-hidden">
+                    <!-- Header -->
+                    <div class="p-4 bg-gradient-to-r from-gray-50 to-white">
+                        <div class="flex justify-between items-start gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-2xl">${config.icon}</span>
+                                    <span class="px-2 py-1 text-xs font-bold text-white ${config.badgeBg} rounded uppercase tracking-wide">
+                                        ${config.badge}
+                                    </span>
                                 </div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-1">
+                                    Title ${t.title_number}: ${t.title_name}
+                                </h3>
+                                <p class="text-sm text-gray-600">Last amended: ${t.last_amended}</p>
                             </div>
-                            <div>
-                                <div class="font-medium mb-2">Change History</div>
-                                <div class="space-y-1">
-                                    <div>Substantive changes: ${t.substantive_changes}</div>
-                                    <div>Removed sections: ${t.removed_sections}</div>
-                                    <div>Checksum: ${t.checksum}</div>
+                            
+                            <!-- Burden Score (Large, Eye-catching) -->
+                            <div class="flex flex-col items-center ${config.burdenBg} px-6 py-3 rounded-lg">
+                                <div class="text-4xl font-black ${config.burdenText}">
+                                    ${t.burden.toFixed(1)}
+                                </div>
+                                <div class="text-xs font-semibold ${config.burdenText} uppercase tracking-wide">
+                                    Burden
+                                </div>
+                                <div class="w-16 h-2 bg-gray-200 rounded-full mt-2">
+                                    <div class="h-2 ${config.badgeBg} rounded-full" style="width: ${burdenPct}%"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 p-3 ${recoBg} rounded">
-                            <strong>Recommendation:</strong> ${recoText}
+                    </div>
+                    
+                    <!-- Metrics Grid with Visual Bars -->
+                    <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-gray-100">
+                        <!-- Words -->
+                        <div class="relative group cursor-help">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-semibold text-gray-600 uppercase">Words</span>
+                                <span class="text-lg font-bold text-gray-900">${(t.word_count / 1000000).toFixed(1)}M</span>
+                            </div>
+                            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-2 bg-purple-500 rounded-full transition-all" style="width: ${wordsPct}%"></div>
+                            </div>
+                            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                                ${wordsPct}% of highest (${(maxWords/1000000).toFixed(1)}M)
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sections -->
+                        <div class="relative group cursor-help">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-semibold text-gray-600 uppercase">Sections</span>
+                                <span class="text-lg font-bold text-gray-900">${(t.sections / 1000).toFixed(1)}K</span>
+                            </div>
+                            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-2 bg-blue-500 rounded-full transition-all" style="width: ${sectionsPct}%"></div>
+                            </div>
+                            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                                ${sectionsPct}% of highest (${(maxSections/1000).toFixed(1)}K)
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Complexity -->
+                        <div class="relative group cursor-help">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-semibold text-gray-600 uppercase">Complexity</span>
+                                <span class="text-lg font-bold text-gray-900">${t.complexity.toFixed(0)}</span>
+                            </div>
+                            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-2 bg-indigo-500 rounded-full transition-all" style="width: ${complexityPct}%"></div>
+                            </div>
+                            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                                ${complexityPct}% of highest (${maxComplexity.toFixed(0)})
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Velocity -->
+                        <div class="relative group cursor-help">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-semibold text-gray-600 uppercase">Changes/Yr</span>
+                                <span class="text-lg font-bold text-gray-900">${t.velocity.toFixed(0)}</span>
+                            </div>
+                            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-2 bg-teal-500 rounded-full transition-all" style="width: ${velocityPct}%"></div>
+                            </div>
+                            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                                ${velocityPct}% of highest (${maxVelocity.toFixed(0)}/yr)
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                            </div>
                         </div>
                     </div>
+                    
+                    <!-- Expandable Details -->
+                    <div id="details-${t.title_number}" class="hidden border-t border-gray-200 bg-gray-50 p-4">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                                    </svg>
+                                    Structure Breakdown
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Parts:</span>
+                                        <span class="font-semibold text-gray-900">${t.parts}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Sections:</span>
+                                        <span class="font-semibold text-gray-900">${t.sections.toLocaleString()}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Density:</span>
+                                        <span class="font-semibold text-gray-900">${t.density} sec/part</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Change History
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Substantive:</span>
+                                        <span class="font-semibold text-gray-900">${t.substantive_changes.toLocaleString()}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Removed:</span>
+                                        <span class="font-semibold text-gray-900">${t.removed_sections.toLocaleString()}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Checksum:</span>
+                                        <span class="font-mono text-xs text-gray-600">${t.checksum}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-4 ${config.burdenBg} border-l-4 ${config.badgeBg} rounded">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-6 h-6 ${config.burdenText} flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <div class="font-bold ${config.burdenText} mb-1">Recommendation</div>
+                                    <div class="${config.burdenText}">
+                                        ${priority === 'critical' ? 'Immediate comprehensive review required. Highest deregulation priority.' :
+                                          priority === 'high' ? 'High priority for review. Significant burden reduction opportunities.' :
+                                          priority === 'medium' ? 'Moderate priority. Targeted improvements recommended.' :
+                                          'Lower burden. Monitor for efficiency and maintain current approach.'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Toggle Button -->
+                    <button 
+                        onclick="toggleDetails(${t.title_number})" 
+                        class="w-full py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors border-t border-gray-200 flex items-center justify-center gap-2"
+                    >
+                        <span id="toggle-text-${t.title_number}">Show Details</span>
+                        <svg id="toggle-icon-${t.title_number}" class="w-4 h-4 transform transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
                 </div>
                 `;
             }).join('');
@@ -222,12 +553,59 @@
         
         function toggleDetails(titleNum) {
             const el = document.getElementById(`details-${titleNum}`);
+            const text = document.getElementById(`toggle-text-${titleNum}`);
+            const icon = document.getElementById(`toggle-icon-${titleNum}`);
+            
             if (el) {
-                el.classList.toggle('hidden');
+                if (el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                    if (text) text.textContent = 'Hide Details';
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                } else {
+                    el.classList.add('hidden');
+                    if (text) text.textContent = 'Show Details';
+                    if (icon) icon.style.transform = 'rotate(0deg)';
+                }
             }
         }
         
         document.getElementById('sort').addEventListener('change', renderTitles);
+        
+        // Accordion toggle function
+        function toggleAccordion(id) {
+            const content = document.getElementById(`${id}-content`);
+            const icon = document.getElementById(`${id}-icon`);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Sidebar toggle for mobile
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarClose = document.getElementById('sidebar-close');
+        
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full');
+        });
+        
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 768) {
+                if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            }
+        });
         
         // Load data on page load
         loadData();
