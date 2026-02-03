@@ -73,11 +73,12 @@
     </div>
 
     <script>
-        // REPLACE THESE WITH YOUR SUPABASE CREDENTIALS
+        // Your Supabase credentials
         const SUPABASE_URL = 'https://loyuoxwhowhhmzoywexb.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxveXVveHdob3doaG16b3l3ZXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNTQwMTEsImV4cCI6MjA4NTczMDAxMX0.-Net5OaKbEpNiI50K0hy__eJbmJXF_MCQ2g29gLLPTs';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Create client (renamed from 'supabase' to avoid conflict with global)
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let titlesData = [];
         let agenciesData = [];
@@ -85,7 +86,9 @@
         async function loadData() {
             try {
                 // Fetch metadata
-                const { data: meta } = await supabase.from('metadata').select('*').single();
+                const { data: meta, error: metaError } = await client.from('metadata').select('*').single();
+                if (metaError) throw metaError;
+                
                 if (meta) {
                     document.getElementById('meta').textContent = 
                         `Generated: ${new Date(meta.generated_at).toLocaleString()}`;
@@ -94,17 +97,23 @@
                 }
                 
                 // Fetch titles
-                const { data: titles } = await supabase.from('titles').select('*');
+                const { data: titles, error: titlesError } = await client.from('titles').select('*');
+                if (titlesError) throw titlesError;
+                
                 titlesData = titles || [];
                 
                 // Calculate stats
-                const totalWords = titlesData.reduce((sum, t) => sum + t.word_count, 0);
-                const avgBurden = titlesData.reduce((sum, t) => sum + t.burden, 0) / titlesData.length;
-                document.getElementById('stat-words').textContent = (totalWords / 1000000).toFixed(1);
-                document.getElementById('stat-burden').textContent = avgBurden.toFixed(2);
+                if (titlesData.length > 0) {
+                    const totalWords = titlesData.reduce((sum, t) => sum + (t.word_count || 0), 0);
+                    const avgBurden = titlesData.reduce((sum, t) => sum + (t.burden || 0), 0) / titlesData.length;
+                    document.getElementById('stat-words').textContent = (totalWords / 1000000).toFixed(1);
+                    document.getElementById('stat-burden').textContent = avgBurden.toFixed(2);
+                }
                 
                 // Fetch agencies
-                const { data: agencies } = await supabase.from('agencies').select('*');
+                const { data: agencies, error: agenciesError } = await client.from('agencies').select('*');
+                if (agenciesError) throw agenciesError;
+                
                 agenciesData = agencies || [];
                 
                 renderTitles();
@@ -112,13 +121,17 @@
             } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('titles-list').innerHTML = 
-                    '<div class="p-8 text-center text-red-500">Error loading data. Check console.</div>';
+                    `<div class="p-8 text-center text-red-500">
+                        <p class="font-bold mb-2">Error loading data</p>
+                        <p class="text-sm">${error.message || 'Check browser console for details'}</p>
+                        <p class="text-xs mt-2 text-gray-500">Make sure RLS is disabled on all tables</p>
+                    </div>`;
             }
         }
         
         function renderTitles() {
             const sortBy = document.getElementById('sort').value;
-            const sorted = [...titlesData].sort((a, b) => b[sortBy] - a[sortBy]);
+            const sorted = [...titlesData].sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
             
             const html = sorted.map(t => {
                 const burdenColor = t.burden > 7 ? 'text-red-600' : t.burden > 4 ? 'text-yellow-600' : 'text-green-600';
@@ -186,7 +199,7 @@
                 `;
             }).join('');
             
-            document.getElementById('titles-list').innerHTML = html;
+            document.getElementById('titles-list').innerHTML = html || '<div class="p-8 text-center text-gray-500">No titles found</div>';
         }
         
         function renderAgencies() {
@@ -194,7 +207,7 @@
                 <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3 font-medium">${i + 1}</td>
                     <td class="px-4 py-3">${a.name}</td>
-                    <td class="px-4 py-3 font-semibold">${a.short_name}</td>
+                    <td class="px-4 py-3 font-semibold">${a.short_name || '-'}</td>
                     <td class="px-4 py-3">
                         <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded font-medium">
                             ${a.title_count}
@@ -204,16 +217,19 @@
                 </tr>
             `).join('');
             
-            document.getElementById('agencies-list').innerHTML = html;
+            document.getElementById('agencies-list').innerHTML = html || '<tr><td colspan="5" class="p-8 text-center text-gray-500">No agencies found</td></tr>';
         }
         
         function toggleDetails(titleNum) {
             const el = document.getElementById(`details-${titleNum}`);
-            el.classList.toggle('hidden');
+            if (el) {
+                el.classList.toggle('hidden');
+            }
         }
         
         document.getElementById('sort').addEventListener('change', renderTitles);
         
+        // Load data on page load
         loadData();
     </script>
 </body>
