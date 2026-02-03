@@ -75,8 +75,7 @@
     <script>
         // REPLACE THESE WITH YOUR SUPABASE CREDENTIALS
         const SUPABASE_URL = 'https://loyuoxwhowhhmzoywexb.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxveXVveHdob3doaG16b3l3ZXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNTQwMTEsImV4cCI6MjA4NTczMDAxMX0.-Net5OaKbEpNiI50K0hy__eJbmJXF_MCQ2g29gLLPTs
-';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxveXVveHdob3doaG16b3l3ZXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNTQwMTEsImV4cCI6MjA4NTczMDAxMX0.-Net5OaKbEpNiI50K0hy__eJbmJXF_MCQ2g29gLLPTs';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
@@ -121,7 +120,14 @@
             const sortBy = document.getElementById('sort').value;
             const sorted = [...titlesData].sort((a, b) => b[sortBy] - a[sortBy]);
             
-            const html = sorted.map(t => `
+            const html = sorted.map(t => {
+                const burdenColor = t.burden > 7 ? 'text-red-600' : t.burden > 4 ? 'text-yellow-600' : 'text-green-600';
+                const recoBg = t.burden > 7 ? 'bg-red-100 text-red-900' : 'bg-green-100 text-green-900';
+                const recoText = t.burden > 7 ? 'High burden - priority for comprehensive review' : 
+                                t.burden > 4 ? 'Moderate burden - targeted improvements recommended' : 
+                                'Lower burden - maintain current efficiency';
+                
+                return `
                 <div class="p-4 hover:bg-gray-50 cursor-pointer" onclick="toggleDetails(${t.title_number})">
                     <div class="flex justify-between items-start mb-2">
                         <div class="flex-1">
@@ -129,7 +135,7 @@
                             <div class="text-sm text-gray-600">Last amended: ${t.last_amended}</div>
                         </div>
                         <div class="text-right">
-                            <div class="text-2xl font-bold ${t.burden > 7 ? 'text-red-600' : t.burden > 4 ? 'text-yellow-600' : 'text-green-600'}">
+                            <div class="text-2xl font-bold ${burdenColor}">
                                 ${t.burden.toFixed(1)}
                             </div>
                             <div class="text-xs text-gray-500">Burden Index</div>
@@ -172,15 +178,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 p-3 ${t.burden > 7 ? 'bg-red-100 text-red-900' : 'bg-green-100 text-green-900'} rounded">
-                            <strong>Recommendation:</strong> 
-                            ${t.burden > 7 ? 'High burden - priority for comprehensive review' : 
-                              t.burden > 4 ? 'Moderate burden - targeted improvements recommended' : 
-                              'Lower burden - maintain current efficiency'}
+                        <div class="mt-3 p-3 ${recoBg} rounded">
+                            <strong>Recommendation:</strong> ${recoText}
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
             
             document.getElementById('titles-list').innerHTML = html;
         }
